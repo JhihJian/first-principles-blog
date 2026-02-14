@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import KBSection from '../components/KBSection.astro';
+import { siteConfig } from '../site.config';
+
+const sections = siteConfig.explore.sections;
+---
+
+<Base title="Explore" activePage="explore">
+  {sections.map((section, index) => (
+    <KBSection
+      label={section.label}
+      icon={section.icon}
+      items={section.items}
+      sectionIndex={index}
+    />
+  ))}
+</Base>

@@ -1,0 +1,34 @@
+name: Build & Deploy
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [content-update]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch posts from content repo
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://x-access-token:${{ secrets.CONTENT_REPO_TOKEN }}@github.com/${{ vars.CONTENT_REPO }}.git /tmp/kb
+          cd /tmp/kb
+          git sparse-checkout set ${{ vars.CONTENT_POSTS_DIR }}
+          cp /tmp/kb/${{ vars.CONTENT_POSTS_DIR }}/*.md $GITHUB_WORKSPACE/src/content/posts/
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          command: pages deploy dist --project-name=${{ vars.CF_PROJECT_NAME }}

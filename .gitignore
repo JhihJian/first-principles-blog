@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Logs
+*.log
+.playwright-mcp/
+
+# Screenshots (temporary files)
+*.png
+
+# OS files
+.DS_Store
+Thumbs.db

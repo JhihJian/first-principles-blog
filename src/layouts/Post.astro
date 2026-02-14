@@ -1,0 +1,207 @@
+---
+import Base from './Base.astro';
+import { siteConfig } from '../site.config';
+
+interface Props {
+  title: string;
+  date: Date;
+  tags?: string[];
+}
+
+const { title, date, tags = [] } = Astro.props;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<Base title={title} activePage="articles">
+  <article class="post">
+    <header class="post-header">
+      <div class="post-meta">
+        <time datetime={date.toISOString().slice(0, 10)}>{formattedDate}</time>
+        {tags.length > 0 && (
+          <div class="post-tags">
+            {tags.map(tag => <span class="post-tag">{tag}</span>)}
+          </div>
+        )}
+      </div>
+      <h1 class="post-title">{title}</h1>
+    </header>
+    <div class="post-content">
+      <slot />
+    </div>
+    <footer class="post-footer">
+      <a href="/" class="back-link">← Back to articles</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding-top: 24px;
+    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .post-header {
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .post-meta time {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 8px;
+  }
+
+  .post-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: rgba(139, 105, 20, 0.06);
+    padding: 3px 8px;
+  }
+
+  .post-title {
+    font-family: 'Newsreader', serif;
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--fg);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  .post-content {
+    font-family: 'Newsreader', serif;
+    font-size: 19px;
+    line-height: 1.8;
+    color: var(--fg);
+    font-variation-settings: 'opsz' 19;
+  }
+
+  .post-content :global(h2) {
+    font-size: 26px;
+    font-weight: 400;
+    margin: 48px 0 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .post-content :global(h3) {
+    font-size: 22px;
+    font-weight: 400;
+    margin: 36px 0 12px;
+    letter-spacing: -0.02em;
+  }
+
+  .post-content :global(p) {
+    margin-bottom: 24px;
+  }
+
+  .post-content :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(139, 105, 20, 0.3);
+    transition: text-decoration-color 0.2s;
+  }
+
+  .post-content :global(a:hover) {
+    text-decoration-color: var(--accent);
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 2px solid var(--accent);
+    padding-left: 20px;
+    margin: 32px 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .post-content :global(code) {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85em;
+    background: var(--bg-alt);
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .post-content :global(pre) {
+    background: var(--bg-alt);
+    padding: 20px 24px;
+    margin: 32px 0;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    line-height: 1.6;
+  }
+
+  .post-content :global(pre code) {
+    background: none;
+    padding: 0;
+    font-size: 14px;
+  }
+
+  .post-content :global(ul),
+  .post-content :global(ol) {
+    margin-bottom: 24px;
+    padding-left: 24px;
+  }
+
+  .post-content :global(li) {
+    margin-bottom: 8px;
+  }
+
+  .post-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  .post-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    margin: 32px 0;
+  }
+
+  .post-footer {
+    margin-top: 64px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .back-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .post-title { font-size: 28px; }
+    .post-content { font-size: 17px; }
+  }
+</style>

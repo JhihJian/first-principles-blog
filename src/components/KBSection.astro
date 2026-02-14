@@ -1,0 +1,68 @@
+---
+import KBCard from './KBCard.astro';
+
+interface Item {
+  title: string;
+  desc: string;
+  count: string;
+  status: string;
+}
+
+interface Props {
+  label: string;
+  icon: string;
+  items: Item[];
+  sectionIndex: number;
+}
+
+const { label, icon, items, sectionIndex } = Astro.props;
+---
+
+<div class="kb-section" style={`animation-delay: ${sectionIndex * 0.1}s;`}>
+  <div class="kb-header">
+    <span class="kb-icon">{icon}</span>
+    <h2 class="kb-title">{label}</h2>
+  </div>
+  <div class="kb-grid">
+    {items.map((item, itemIndex) => (
+      <KBCard {...item} sectionIndex={sectionIndex} itemIndex={itemIndex} />
+    ))}
+  </div>
+</div>
+
+<style>
+  .kb-section {
+    margin-bottom: 56px;
+    opacity: 0;
+    animation: fadeSlideIn 0.5s ease forwards;
+  }
+
+  .kb-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .kb-icon {
+    font-size: 16px;
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  .kb-title {
+    font-family: 'Newsreader', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--fg);
+    margin: 0;
+  }
+
+  .kb-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+</style>

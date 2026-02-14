@@ -1,0 +1,96 @@
+---
+interface Props {
+  title: string;
+  desc: string;
+  count: string;
+  status: string;
+  sectionIndex: number;
+  itemIndex: number;
+}
+
+const { title, desc, count, status, sectionIndex, itemIndex } = Astro.props;
+const delay = (sectionIndex * 0.1) + (itemIndex * 0.08);
+---
+
+<div class="kb-card" style={`animation-delay: ${delay}s;`}>
+  <h3 class="kb-card-title">{title}</h3>
+  <p class="kb-card-desc">{desc}</p>
+  <div class="kb-card-footer">
+    <span>{count}</span>
+    {status && <span class={`status-${status}`}>{status}</span>}
+  </div>
+</div>
+
+<style>
+  .kb-card {
+    padding: 24px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeSlideIn 0.5s ease forwards;
+  }
+
+  .kb-card::before {
+    content: '\201C';
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    font-family: 'Newsreader', serif;
+    font-size: 80px;
+    color: var(--border);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  .kb-card:hover {
+    border-color: rgba(139, 105, 20, 0.4);
+    background: rgba(139, 105, 20, 0.03);
+    transform: translateY(-2px);
+  }
+
+  .kb-card:hover::before { opacity: 1; }
+
+  .kb-card-title {
+    font-family: 'Newsreader', serif;
+    font-size: 19px;
+    font-weight: 400;
+    margin: 0 0 10px 0;
+    color: var(--fg);
+    position: relative;
+    z-index: 1;
+  }
+
+  .kb-card-desc {
+    font-family: 'Newsreader', serif;
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0 0 20px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .kb-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  .kb-card-footer :global(.status-active),
+  .kb-card-footer :global(.status-building),
+  .kb-card-footer :global(.status-updating) {
+    color: var(--accent);
+  }
+</style>

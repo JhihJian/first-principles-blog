@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JhihJian - First Principles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #fcfaf7;
+      --bg-alt: #f4f1eb;
+      --fg: #1a1a1a;
+      --muted: #8a847a;
+      --muted-light: #b8b2a8; /* 更淡的灰色用于次要元数据 */
+      --accent: #8b6914;
+      --border: #e8e3da;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Newsreader', serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    ::selection { background: rgba(139, 105, 20, 0.15); }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+    /* Animations */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grain Texture */
+    .grain::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px;
+      z-index: 9999;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 40px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    header {
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(252,250,247,0.92);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+    }
+
+    .site-title {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-family: 'Newsreader', serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--fg);
+      letter-spacing: -0.02em;
+    }
+
+    .site-tagline {
+      font-family: 'Newsreader', serif;
+      font-style: italic;
+      font-size: 15px;
+      color: var(--muted);
+      padding-left: 24px;
+      border-left: 1px solid var(--border);
+    }
+
+    /* Nav: 极简图标导航 */
+    .nav-icon {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 18px;
+      color: var(--muted);
+      transition: all 0.3s ease;
+      line-height: 1;
+    }
+
+    .nav-icon:hover {
+      color: var(--accent);
+      transform: rotate(90deg); /* 悬停时旋转暗示可交互 */
+    }
+    
+    .nav-icon.active {
+        color: var(--fg);
+    }
+
+    /* Main Content */
+    main { padding-top: 24px; }
+
+    .page {
+      display: none;
+      opacity: 0;
+    }
+
+    .page.active {
+      display: block;
+      animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Article List */
+    .article-row {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 0;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      border-bottom: 1px solid var(--border);
+      opacity: 0;
+      animation: fadeSlideIn 0.5s ease forwards;
+      position: relative;
+    }
+
+    .article-row:hover { background: rgba(139,105,20,0.02); }
+
+    .article-year {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 28px 0 28px 0;
+      letter-spacing: 0.02em;
+      vertical-align: top;
+    }
+
+    .article-content {
+      padding: 24px 0 24px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* 垂直居中内容 */
+    }
+
+    /* 改进：弱化日期，使其像页码 */
+    .article-date {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; /* 缩小 */
+      color: var(--muted-light); /* 淡化 */
+      margin-bottom: 4px; /* 减少间距 */
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .article-title {
+      font-family: 'Newsreader', serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--fg);
+      line-height: 1.3;
+      margin: 0 0 6px 0;
+      transition: color 0.25s ease;
+      letter-spacing: -0.02em;
+    }
+
+    .article-row:hover .article-title { color: var(--accent); }
+
+    .article-excerpt {
+      font-family: 'Newsreader', serif;
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.75;
+      margin: 0;
+      max-width: 540px;
+      font-variation-settings: 'opsz' 17;
+    }
+
+    /* 改进：标签默认隐藏，hover时浮现 */
+    .article-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      background: rgba(139,105,20,0.06);
+      padding: 3px 8px;
+      white-space: nowrap;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%); /* 垂直居中 */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .article-row:hover .article-tag {
+      opacity: 1;
+    }
+
+    /* Explore Section */
+    .kb-section {
+      margin-bottom: 56px;
+      opacity: 0;
+      animation: fadeSlideIn 0.5s ease forwards;
+    }
+
+    .kb-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kb-icon {
+      font-size: 16px;
+      color: var(--muted);
+      opacity: 0.5;
+    }
+
+    .kb-title {
+      font-family: 'Newsreader', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--fg);
+      margin: 0;
+    }
+
+    .kb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* KB Card */
+    .kb-card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeSlideIn 0.5s ease forwards;
+    }
+    
+    .kb-card::before {
+        content: '“';
+        position: absolute;
+        top: -10px;
+        right: 10px;
+        font-family: 'Newsreader', serif;
+        font-size: 80px;
+        color: var(--border);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        line-height: 1;
+    }
+
+    .kb-card:hover {
+      border-color: rgba(139,105,20,0.4);
+      background: rgba(139,105,20,0.03);
+      transform: translateY(-2px);
+    }
+    
+    .kb-card:hover::before { opacity: 1; }
+
+    .kb-card-title {
+      font-family: 'Newsreader', serif;
+      font-size: 19px;
+      font-weight: 400;
+      margin: 0 0 10px 0;
+      color: var(--fg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .kb-card-desc {
+      font-family: 'Newsreader', serif;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0 0 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .kb-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .status-active, .status-building, .status-updating { color: var(--accent); }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      margin-top: 100px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .footer-links { display: flex; gap: 24px; }
+
+    .footer-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .footer-link:hover { color: var(--accent); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      header { padding: 20px 0; position: relative; backdrop-filter: none; background: transparent; }
+      .site-tagline { display: none; }
+      .article-row { grid-template-columns: 1fr; gap: 8px; padding: 20px 0; }
+      .article-year { display: none; }
+      .article-content { padding: 0; }
+      .article-title { font-size: 20px; }
+      .article-excerpt { font-size: 16px; }
+      /* 移动端标签始终显示在标题旁 */
+      .article-tag {
+        position: relative;
+        top: 0;
+        transform: none;
+        opacity: 1;
+        display: inline-block;
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grain">
+    <div class="container">
+      
+      <!-- Header -->
+      <header>
+        <div class="header-brand">
+          <button class="site-title" onclick="switchPage('articles')">JhihJian</button>
+          <span class="site-tagline">think from scratch, keep only what matters</span>
+        </div>
+
+        <!-- 极简导航：仅保留切换图标 -->
+        <nav>
+          <button class="nav-icon active" id="nav-toggle" onclick="toggleExplore()" title="Toggle Explore">
+            ◇
+          </button>
+        </nav>
+      </header>
+
+      <!-- Main Content -->
+      <main id="main-content">
+        <div class="page active" id="page-articles"></div>
+        <div class="page" id="page-explore"></div>
+      </main>
+
+      <!-- Footer -->
+      <footer>
+        <span class="footer-copy">© 2026</span>
+        <div class="footer-links">
+          <a href="#" class="footer-link">GitHub</a>
+          <a href="#" class="footer-link">Email</a>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    // Data
+    const POSTS = [
+      { year: "2026", date: "Feb 10", title: "On First Principles in System Design", excerpt: "Why stripping away assumptions leads to better architectures — and how to practice it daily.", tag: "systems" },
+      { year: "", date: "Jan 28", title: "The Hidden Cost of Abstractions", excerpt: "Every layer of abstraction is a trade-off. Here's a framework for deciding when the cost is worth it.", tag: "engineering" },
+      { year: "", date: "Jan 15", title: "Building a Second Brain for Engineers", excerpt: "How I organized my knowledge base using plain files, and why it works better than any app.", tag: "productivity" },
+      { year: "2025", date: "Dec 30", title: "Distributed Consensus, Simplified", excerpt: "A visual walkthrough of Raft consensus — from leader election to log replication.", tag: "distributed" },
+      { year: "", date: "Dec 18", title: "Why I Open Source Everything", excerpt: "The compounding returns of building in public, and lessons from contributing to three major projects.", tag: "open-source" },
+      { year: "", date: "Dec 01", title: "Minimalism as Engineering Discipline", excerpt: "Perfection is achieved not when there is nothing more to add, but when there is nothing left to take away.", tag: "thinking" },
+      { year: "", date: "Nov 20", title: "Event Sourcing in Practice", excerpt: "From theory to production: real patterns and pitfalls from implementing event sourcing at scale.", tag: "architecture" },
+      { year: "", date: "Nov 05", title: "The Art of Technical Writing", excerpt: "Clear writing is clear thinking. Techniques for making complex ideas accessible.", tag: "writing" },
+    ];
+
+    const KB = {
+      opensource: [
+        { title: "Redis Internals", desc: "Memory database design philosophy and implementation details", count: "12 notes", status: "active" },
+        { title: "SQLite Architecture", desc: "How an embedded database handles SQL parsing and storage", count: "8 notes", status: "active" },
+        { title: "Nginx Event Model", desc: "Event-driven architecture in high-concurrency scenarios", count: "6 notes", status: "done" },
+        { title: "LevelDB Storage Engine", desc: "LSM Tree optimizations in production environments", count: "10 notes", status: "done" },
+      ],
+      cs: [
+        { title: "Data Structures & Algorithms", desc: "Core structures, their principles and typical applications", count: "15 notes", status: "updating" },
+        { title: "Design Patterns", desc: "Modern interpretations of the classic GoF patterns", count: "23 notes", status: "done" },
+        { title: "Operating Systems", desc: "Processes, memory management, and file systems", count: "12 notes", status: "done" },
+        { title: "Computer Networks", desc: "From physical layer to application layer protocols", count: "18 notes", status: "done" },
+      ],
+      inspirations: [
+        { title: "Dev Tools", desc: "CLI tools and editor configurations for productivity", count: "24 items", status: "" },
+        { title: "Design Resources", desc: "Color, typography, and UI design references", count: "36 items", status: "" },
+        { title: "Tech Blogs", desc: "High-quality technical writing worth following", count: "18 links", status: "" },
+        { title: "Hidden Gems", desc: "Niche but genuinely useful open source discoveries", count: "42 items", status: "" },
+      ],
+      projects: [
+        { title: "KB-Engine", desc: "Personal knowledge base system built on the file system", count: "Rust", status: "building" },
+        { title: "TinyKV", desc: "Educational key-value store with persistence and transactions", count: "Go", status: "done" },
+        { title: "StaticGen", desc: "Minimal static site generator with Markdown support", count: "Python", status: "done" },
+      ],
+    };
+    
+    const SECTIONS = [
+      { key: "opensource", label: "Open Source", icon: "◈" },
+      { key: "cs", label: "Computer Science", icon: "△" },
+      { key: "inspirations", label: "Inspirations", icon: "✦" },
+      { key: "projects", label: "Projects", icon: "◉" },
+    ];
+
+    // State
+    let currentPage = 'articles';
+
+    // Initialization 
+    function init() {
+      renderArticles();
+      renderExplore();
+    }
+
+    // Render Articles
+    function renderArticles() {
+      const container = document.getElementById('page-articles');
+      let html = '';
+      
+      POSTS.forEach((post, index) => {
+        html += `
+          <div class="article-row" style="animation-delay: ${index * 0.05}s;">
+            <div class="article-year">${post.year}</div>
+            <div class="article-content">
+              <div class="article-date">${post.date}</div>
+              <h3 class="article-title">${post.title}</h3>
+              <p class="article-excerpt">${post.excerpt}</p>
+            </div>
+            <span class="article-tag">${post.tag}</span>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // Render Explore
+    function renderExplore() {
+      const container = document.getElementById('page-explore');
+      let html = '';
+      
+      SECTIONS.forEach((section, sectionIndex) => {
+        const items = KB[section.key];
+        html += `
+          <div class="kb-section" style="animation-delay: ${sectionIndex * 0.1}s;">
+            <div class="kb-header">
+              <span class="kb-icon">${section.icon}</span>
+              <h2 class="kb-title">${section.label}</h2>
+            </div>
+            <div class="kb-grid">
+              ${items.map((item, itemIndex) => `
+                <div class="kb-card" style="animation-delay: ${(sectionIndex * 0.1) + (itemIndex * 0.08)}s;">
+                  <h3 class="kb-card-title">${item.title}</h3>
+                  <p class="kb-card-desc">${item.desc}</p>
+                  <div class="kb-card-footer">
+                    <span>${item.count}</span>
+                    ${item.status ? `<span class="status-${item.status}">${item.status}</span>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    // Navigation Logic: Toggle between Articles and Explore
+    function toggleExplore() {
+      const navIcon = document.getElementById('nav-toggle');
+      const pageArticles = document.getElementById('page-articles');
+      const pageExplore = document.getElementById('page-explore');
+
+      if (currentPage === 'articles') {
+        currentPage = 'explore';
+        navIcon.classList.remove('active');
+        navIcon.innerHTML = '◆'; // 实心图标代表展开/探索状态
+        
+        pageArticles.classList.remove('active');
+        pageExplore.classList.add('active');
+        
+        // Trigger animations
+        resetAnimations(pageExplore);
+      } else {
+        currentPage = 'articles';
+        navIcon.classList.add('active');
+        navIcon.innerHTML = '◇'; // 空心图标代表默认状态
+        
+        pageExplore.classList.remove('active');
+        pageArticles.classList.add('active');
+        
+        // Trigger animations
+        resetAnimations(pageArticles);
+      }
+    }
+
+    function resetAnimations(targetPage) {
+      const elements = targetPage.querySelectorAll('.article-row, .kb-section, .kb-card');
+      elements.forEach(el => {
+        el.style.animation = 'none';
+        void el.offsetHeight;
+        el.style.animation = '';
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

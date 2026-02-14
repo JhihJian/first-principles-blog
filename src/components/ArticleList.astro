@@ -1,0 +1,48 @@
+---
+import ArticleRow from './ArticleRow.astro';
+
+interface Post {
+  id: string;
+  data: {
+    title: string;
+    date: Date;
+    tags: string[];
+    excerpt?: string;
+  };
+}
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+
+// Group by year and format dates
+let lastYear = '';
+const rows = posts.map((post, index) => {
+  const year = post.data.date.getFullYear().toString();
+  const showYear = year !== lastYear;
+  lastYear = year;
+
+  const dateStr = post.data.date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return {
+    year: showYear ? year : '',
+    date: dateStr,
+    title: post.data.title,
+    excerpt: post.data.excerpt || '',
+    tag: post.data.tags[0] || '',
+    slug: post.id,
+    index,
+  };
+});
+---
+
+<div class="article-list">
+  {rows.map(row => (
+    <ArticleRow {...row} />
+  ))}
+</div>

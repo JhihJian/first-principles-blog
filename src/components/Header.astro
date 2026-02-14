@@ -1,0 +1,99 @@
+---
+import { siteConfig } from '../site.config';
+
+interface Props {
+  activePage?: 'articles' | 'explore';
+}
+
+const { activePage = 'articles' } = Astro.props;
+const showExplore = siteConfig.explore.enabled;
+---
+
+<header>
+  <div class="header-brand">
+    <a class="site-title" href="/">{siteConfig.title}</a>
+    <span class="site-tagline">{siteConfig.tagline}</span>
+  </div>
+  {showExplore && (
+    <nav>
+      <a
+        class:list={['nav-icon', { active: activePage === 'explore' }]}
+        href={activePage === 'articles' ? '/explore' : '/'}
+        title="Toggle Explore"
+      >
+        {activePage === 'explore' ? '◆' : '◇'}
+      </a>
+    </nav>
+  )}
+</header>
+
+<style>
+  header {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(252, 250, 247, 0.92);
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+
+  .site-title {
+    font-family: 'Newsreader', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--fg);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+
+  .site-tagline {
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--muted);
+    padding-left: 24px;
+    border-left: 1px solid var(--border);
+  }
+
+  .nav-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    font-size: 18px;
+    color: var(--muted);
+    transition: all 0.3s ease;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .nav-icon:hover {
+    color: var(--accent);
+    transform: rotate(90deg);
+  }
+
+  .nav-icon.active {
+    color: var(--fg);
+  }
+
+  @media (max-width: 768px) {
+    header {
+      padding: 20px 0;
+      position: relative;
+      backdrop-filter: none;
+      background: transparent;
+    }
+    .site-tagline { display: none; }
+  }
+</style>

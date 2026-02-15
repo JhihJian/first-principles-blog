@@ -18,3 +18,4 @@ Thumbs.db
 
 # Local development posts (production fetches from separate content repo)
 src/content/posts/*.md
+.vercel

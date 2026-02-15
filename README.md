@@ -30,15 +30,38 @@ Go to your GitHub repository: **Settings > Secrets and variables > Actions**
    - Value: Paste the token you copied
    - Click **Add secret**
 
-#### 1.2 Configure Cloudflare API Token (for CF_API_TOKEN)
+#### 1.2 Configure Vercel (for VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID)
 
-1. Go to Cloudflare dashboard: https://dash.cloudflare.com/profile/api-tokens
-2. Click **Create Token**
-3. Use template **"Cloudflare Pages: Edit"**
-4. Select your account and zone, or use **"Include > All zones"**
-5. Click **Continue to summary > Create token**
-6. **Copy the token**
-7. Add to GitHub Secrets as `CF_API_TOKEN`
+1. **Install Vercel CLI locally**:
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Login and link project**:
+   ```bash
+   cd /path/to/first-principles-blog
+   vercel login
+   vercel link
+   ```
+   - When prompted, select "No" to not override existing settings
+   - This creates `.vercel/project.json`
+
+3. **Get project info**:
+   ```bash
+   cat .vercel/project.json
+   # 输出: {"orgId":"xxxxxxxx","projectId":"xxxxxxxx"}
+   ```
+
+4. **Generate Vercel Token**:
+   - Go to https://vercel.com/account/tokens
+   - Click **Create Token**
+   - Name: `GitHub Actions Deploy`
+   - **Copy the token**
+
+5. **Add to GitHub Secrets**:
+   - `VERCEL_TOKEN` = 复制的 token
+   - `VERCEL_ORG_ID` = project.json 中的 orgId
+   - `VERCEL_PROJECT_ID` = project.json 中的 projectId
 
 #### 1.3 Configure Repository Variables
 
@@ -48,7 +71,6 @@ In **Settings > Secrets and variables > Actions > Variables** tab, add:
 |----------|---------------|-------------|
 | `CONTENT_REPO` | `yourname/blog-content` | Content repository (format: `username/repo-name`) |
 | `CONTENT_POSTS_DIR` | `posts` | Directory in content repo containing `.md` files |
-| `CF_PROJECT_NAME` | `first-principles-blog` | Your Cloudflare Pages project name |
 
 ### 2. Content Repository Setup
 
@@ -65,12 +87,12 @@ In **Settings > Secrets and variables > Actions > Variables** tab, add:
   ```
 - [ ] Grant `CONTENT_REPO_TOKEN` access to this repository
 
-### 3. Cloudflare Pages Configuration
+### 3. Vercel Project Configuration
 
-- [ ] Create a new Pages project in Cloudflare dashboard
-- [ ] Configure custom domain `jhihjian.com` (DNS A/AAAA records pointing to Cloudflare)
-- [ ] Generate API token with **Cloudflare Pages:Edit** permission
-- [ ] Save token as `CF_API_TOKEN` in GitHub secrets
+- [ ] Run `vercel link` in local project directory (see 1.2)
+- [ ] (Optional) Configure custom domain in Vercel dashboard:
+   - Project Settings > Domains > Add `jhihjian.com`
+   - Follow DNS configuration instructions
 
 ### 4. Local Development Workflow
 
@@ -108,10 +130,12 @@ Or manually: Go to **Actions > Build & Deploy > Run workflow**
 
 ### 6. Post-Deployment Verification
 
-- [ ] Site accessible at custom domain
+- [ ] Site accessible at Vercel domain (`https://your-project.vercel.app`)
+- [ ] (Optional) Custom domain `jhihjian.com` working
 - [ ] RSS feed working at `/rss.xml`
 - [ ] All posts rendering correctly
 - [ ] Navigation between Articles and Explore working
+- [ ] GitHub Actions workflow showing green checkmarks
 
 ## Project Structure
 

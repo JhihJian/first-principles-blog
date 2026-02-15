@@ -6,29 +6,34 @@ on:
     types: [content-update]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        # ... 检出代码、拉取内容、构建 ...
+        - run: npm ci
+        - run: npm run build
+        - uses: actions/upload-artifact@v4  # 保存构建产物
+          with:
+            name: dist
+            path: dist/
 
-      - name: Fetch posts from content repo
-        run: |
-          git clone --depth 1 --filter=blob:none --sparse \
-            https://x-access-token:${{ secrets.CONTENT_REPO_TOKEN }}@github.com/${{ vars.CONTENT_REPO }}.git /tmp/kb
-          cd /tmp/kb
-          git sparse-checkout set ${{ vars.CONTENT_POSTS_DIR }}
-          cp /tmp/kb/${{ vars.CONTENT_POSTS_DIR }}/*.md $GITHUB_WORKSPACE/src/content/posts/
+    deploy-github-pages:
+      needs: build
+      runs-on: ubuntu-latest
+      permissions:
+        pages: write
+        id-token: write
+      environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+      steps:
+        - uses: actions/download-artifact@v4
+          with:
+            name: dist
+            path: dist/
+        - uses: actions/upload-pages-artifact@v3
+          with:
+            path: dist/
+        - id: deployment
+          uses: actions/deploy-pages@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          command: pages deploy dist --project-name=${{ vars.CF_PROJECT_NAME }}

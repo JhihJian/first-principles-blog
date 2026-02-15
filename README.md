@@ -6,16 +6,49 @@ A minimalist personal blog built with Astro, featuring an editorial design aesth
 
 ### 1. GitHub Repository Secrets & Variables
 
-Configure in **Settings > Secrets and variables > Actions**:
+Go to your GitHub repository: **Settings > Secrets and variables > Actions**
 
-**Secrets (encrypted):**
-- `CONTENT_REPO_TOKEN` - GitHub Personal Access Token with read access to content repo
-- `CF_API_TOKEN` - Cloudflare API Token with Pages deploy permissions
+#### 1.1 Create GitHub Personal Access Token (for CONTENT_REPO_TOKEN)
 
-**Variables (plain text):**
-- `CONTENT_REPO` - Format: `username/content-repo-name`
-- `CONTENT_POSTS_DIR` - Directory in content repo containing markdown posts (e.g., `posts`)
-- `CF_PROJECT_NAME` - Cloudflare Pages project name
+1. **Generate the token** (use a dedicated GitHub account or your own):
+   - Go to https://github.com/settings/tokens?type=classic
+   - Click **Generate new token (classic)**
+   - Token name: `Blog Content Repo Access`
+   - Expiration: Choose an expiration (recommend: 1 year)
+   - Scopes: Select **`repo`** (full control of private repositories)
+   - Click **Generate token**
+   - **⚠️ Copy the token immediately** (you won't see it again)
+
+2. **Grant token access to content repo**:
+   - Go to your **content repository** (the separate repo storing posts)
+   - **Settings > Manage access > Invite a collaborator**
+   - Add the GitHub account that owns the token
+
+3. **Add to GitHub Secrets**:
+   - Back in your **blog repository**: **Settings > Secrets and variables > Actions > New repository secret**
+   - Name: `CONTENT_REPO_TOKEN`
+   - Value: Paste the token you copied
+   - Click **Add secret**
+
+#### 1.2 Configure Cloudflare API Token (for CF_API_TOKEN)
+
+1. Go to Cloudflare dashboard: https://dash.cloudflare.com/profile/api-tokens
+2. Click **Create Token**
+3. Use template **"Cloudflare Pages: Edit"**
+4. Select your account and zone, or use **"Include > All zones"**
+5. Click **Continue to summary > Create token**
+6. **Copy the token**
+7. Add to GitHub Secrets as `CF_API_TOKEN`
+
+#### 1.3 Configure Repository Variables
+
+In **Settings > Secrets and variables > Actions > Variables** tab, add:
+
+| Variable | Example Value | Description |
+|----------|---------------|-------------|
+| `CONTENT_REPO` | `yourname/blog-content` | Content repository (format: `username/repo-name`) |
+| `CONTENT_POSTS_DIR` | `posts` | Directory in content repo containing `.md` files |
+| `CF_PROJECT_NAME` | `first-principles-blog` | Your Cloudflare Pages project name |
 
 ### 2. Content Repository Setup
 

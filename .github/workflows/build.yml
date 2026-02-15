@@ -17,7 +17,10 @@ jobs:
             https://x-access-token:${{ secrets.CONTENT_REPO_TOKEN }}@github.com/${{ vars.CONTENT_REPO }}.git /tmp/kb
           cd /tmp/kb
           git sparse-checkout set ${{ vars.CONTENT_POSTS_DIR }}
+          git checkout
+          ls -la /tmp/kb/${{ vars.CONTENT_POSTS_DIR }}/
           cp /tmp/kb/${{ vars.CONTENT_POSTS_DIR }}/*.md $GITHUB_WORKSPACE/src/content/posts/
+          ls -la $GITHUB_WORKSPACE/src/content/posts/
 
       - uses: actions/setup-node@v4
         with:
